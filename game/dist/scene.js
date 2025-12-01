@@ -1,0 +1,199 @@
+import { Base } from "./base/base.js";
+import { Bullet } from "./bullet.js";
+import { Player } from "./player.js";
+import { Target } from "./target.js";
+export class Scene extends Base.GameModule {
+    _gameScene;
+    _background;
+    _mask;
+    _bound;
+    _bowString;
+    _aimLine;
+    _targetsContainer;
+    _bulletsContainer;
+    _timeCounter = 0;
+    _targets = [];
+    _bullets = [];
+    _targetTypes = Base.Constant.Ball.Target.Types;
+    _boundPoints = [
+        new Base.Vector2(Base.Constant.Scene.Bound.Min.X, Base.Constant.Scene.Bound.Min.Y),
+        new Base.Vector2(Base.Constant.Scene.Bound.Min.X, Base.Constant.Scene.Bound.Max.Y),
+        new Base.Vector2(Base.Constant.Scene.Bound.Max.X, Base.Constant.Scene.Bound.Max.Y),
+        new Base.Vector2(Base.Constant.Scene.Bound.Max.X, Base.Constant.Scene.Bound.Min.Y)
+    ];
+    _bowStringPoints = [-1, 0, 1].map(num => new Base.Vector2(Base.Constant.Scene.Background.Width / 2 + Base.Constant.Scene.Bow_String.Length / 2 * num, Base.Constant.Scene.Bow_String.Y));
+    constructor() {
+        super();
+        this._gameScene = document.querySelector("#game-scene")
+            ?? (() => { throw Error("Can not find game scene."); })();
+        this._background = this._gameScene.querySelector("#background")
+            ?? (() => { throw Error("Can not find background in game scene."); })();
+        this._mask = this._gameScene.querySelector("#mask")
+            ?? (() => { throw Error("Can not find mask in game scene."); })();
+        this._bound = this._gameScene.querySelector("#bound")
+            ?? (() => { throw Error("Can not find bound in game scene."); })();
+        this._bowString = this._gameScene.querySelector("#bow-string")?.querySelector("polyline")
+            ?? (() => { throw Error("Can not find bow string in game scene."); })();
+        this._targetsContainer = this._gameScene.querySelector("#targets-container")
+            ?? (() => { throw Error("Can not find targets container in game scene."); })();
+        this._bulletsContainer = this._gameScene.querySelector("#bullets-container")
+            ?? (() => { throw Error("Can not find bullets container in game scene."); })();
+        this._aimLine = this._gameScene.querySelector("#aim-line")
+            ?? (() => { throw Error("Can not find aim line in game scene."); })();
+    }
+    onInit() {
+        this._setAttributes(this._gameScene, ["viewBox", `0 0 ${Base.Constant.Scene.Background.Width} ${Base.Constant.Scene.Background.Height}`]);
+        this._setAttributes(this._background, ["fill", Base.Constant.Scene.Background.Color]);
+        this._setAttributes(this._mask, ["y", Base.Constant.Scene.Mask.Y], ["fill", Base.Constant.Scene.Mask.Color], ["opacity", Base.Constant.Scene.Mask.Opacity]);
+        this._setAttributes(this._bound, ["x", Base.Constant.Scene.Bound.Min.X], ["y", Base.Constant.Scene.Bound.Min.Y], ["width", Base.Constant.Scene.Bound.Max.X - Base.Constant.Scene.Bound.Min.X], ["height", Base.Constant.Scene.Bound.Max.Y - Base.Constant.Scene.Bound.Min.Y], ["fill", Base.Constant.Scene.Bound.Color], ["opacity", Base.Constant.Scene.Bound.Opacity]);
+        this._setAttributes(this._bowString, ["points", this._getPointsString(...this._bowStringPoints)], ["stroke-width", Base.Constant.Scene.Bow_String.Width], ["stroke", Base.Constant.Scene.Bow_String.Color]);
+        this._setAttributes(this._aimLine, ["stroke-width", Base.Constant.Scene.Aim_Line.Width], ["stroke", Base.Constant.Scene.Aim_Line.Color], ["opacity", 0]);
+    }
+    onUpdate(deltaTime) {
+        if (this._timeCounter < Base.Constant.Game.Spawn_Target_Interval) {
+            this._timeCounter += deltaTime;
+        }
+        else {
+            this.spawnTarget();
+            this._timeCounter = 0;
+        }
+        this._preUpdateTargets(deltaTime);
+        this._preUpdateBullets(deltaTime);
+        this._checkTargetsCollision(deltaTime);
+        this._lateUpdateTargets(deltaTime);
+        this._lateUpdateBullets(deltaTime);
+        //console.info(this._targets.length);
+    }
+    _preUpdateTargets(deltaTime) {
+        this._targets.forEach(target => {
+            target[0].preUpdate(deltaTime);
+            if (target[0].movingDistanceToSegment(this._boundPoints[0], this._boundPoints[1]) <= target[0].Radius) {
+                target[0].NextPosition.x = (this._boundPoints[0].x + target[0].Radius) * 2 - target[0].NextPosition.x;
+            }
+            else if (target[0].movingDistanceToSegment(this._boundPoints[2], this._boundPoints[3]) <= target[0].Radius) {
+                target[0].NextPosition.x = (this._boundPoints[2].x - target[0].Radius) * 2 - target[0].NextPosition.x;
+            }
+            else {
+                return;
+            }
+            target[0].Velocity.flipX();
+            target[0].Acceleration.flipX();
+        });
+    }
+    _preUpdateBullets(deltaTime) {
+        this._bullets.forEach(bullet => {
+            bullet[0].preUpdate(deltaTime);
+        });
+    }
+    _checkTargetsCollision(deltaTime) {
+        this._targets.forEach(target => {
+            if (target[0].IsHitted) {
+                return;
+            }
+            this._bullets.forEach(bullet => {
+                target[0].checkCollision(bullet[0]);
+            });
+        });
+    }
+    _lateUpdateTargets(deltaTime) {
+        for (let i = this._targets.length - 1; i >= 0; i--) {
+            const target = this._targets[i];
+            target[0].lateUpdate(deltaTime);
+            this._setAttributes(target[1], ["x", target[0].Position.x - target[0].Radius], ["y", target[0].Position.y - target[0].Radius]);
+            if (target[0].Position.x <= Base.Constant.Scene.Bound.Min.X + target[0].Radius
+                || target[0].Position.x >= Base.Constant.Scene.Bound.Max.X - target[0].Radius) {
+                this._removeTarget(i);
+                continue;
+            }
+            if (target[0].Position.y >= Base.Constant.Scene.Bound.Max.Y - target[0].Radius) {
+                if (!target[0].IsHitted) {
+                    Player.getInstance().onMiss();
+                }
+                this._removeTarget(i);
+                continue;
+            }
+        }
+    }
+    _lateUpdateBullets(deltaTime) {
+        for (let i = this._bullets.length - 1; i >= 0; i--) {
+            const bullet = this._bullets[i];
+            bullet[0].lateUpdate(deltaTime);
+            this._setAttributes(bullet[1], ["x", bullet[0].Position.x - bullet[0].Radius], ["y", bullet[0].Position.y - bullet[0].Radius]);
+            if (!bullet[0].InScene) {
+                this._removeBullet(i);
+            }
+            //console.info(this._bullets.length);
+        }
+    }
+    spawnTarget() {
+        var targetType = this._targetTypes[Math.floor(Math.random() * this._targetTypes.length)];
+        const target = Target.create(targetType, this._onTargetHitted.bind(this));
+        const targetElement = document.createElementNS("http://www.w3.org/2000/svg", "use");
+        const typeSymbolElement = document.getElementById(targetType.toLowerCase());
+        if (!typeSymbolElement) {
+            targetType = "default";
+        }
+        targetElement.setAttributeNS("http://www.w3.org/1999/xlink", "href", `#${targetType.toLowerCase()}`);
+        this._setAttributes(targetElement, ["class", "target"], ["width", target.Radius * 2], ["height", target.Radius * 2], ["x", target.Position.x - target.Radius], ["y", target.Position.y - target.Radius]);
+        this._targetsContainer.appendChild(targetElement);
+        this._targets.push([target, targetElement]);
+    }
+    _removeTarget(index) {
+        const target = this._targets[index][1];
+        this._targets.splice(index, 1);
+        if (target) {
+            this._targetsContainer.removeChild(target);
+        }
+    }
+    spawnBullet(position, angle) {
+        const bullet = Bullet.create(position, angle);
+        const bulletElement = document.createElementNS("http://www.w3.org/2000/svg", "use");
+        bulletElement.setAttributeNS("http://www.w3.org/1999/xlink", "href", "#bullet");
+        this._setAttributes(bulletElement, ["class", "bullet"], ["width", bullet.Radius * 2], ["height", bullet.Radius * 2], ["x", bullet.Position.x - bullet.Radius], ["y", bullet.Position.y - bullet.Radius]);
+        this._bulletsContainer.appendChild(bulletElement);
+        this._bullets.push([bullet, bulletElement]);
+    }
+    _removeBullet(index) {
+        const bullet = this._bullets[index][1];
+        this._bullets.splice(index, 1);
+        if (bullet) {
+            this._bulletsContainer.removeChild(bullet);
+        }
+    }
+    setBowString(drawed, angle = -0.5 * Math.PI, stretch = 0) {
+        const p0 = Base.Vector2.rotate(this._bowStringPoints[0], this._bowStringPoints[1], (angle - 0.5 * Math.PI) / 2);
+        const p2 = Base.Vector2.rotate(this._bowStringPoints[2], this._bowStringPoints[1], (angle - 0.5 * Math.PI) / 2);
+        const p1 = Base.Vector2.add(this._bowStringPoints[1], new Base.Vector2(Math.cos(angle), Math.sin(angle)).multiply(stretch));
+        this._setAttributes(this._bowString, ["points", this._getPointsString(p0, p1, p2)]);
+    }
+    setAimLine(active = false, angle = -0.5 * Math.PI, stretch = 0) {
+        if (!active) {
+            this._setAttributes(this._aimLine, ["opacity", 0]);
+            return;
+        }
+        const pFrom = Base.Vector2.add(this._bowStringPoints[1], new Base.Vector2(Math.cos(angle), Math.sin(angle)).multiply(stretch));
+        const pTo = Base.Vector2.add(pFrom, new Base.Vector2(Math.cos(angle + Math.PI), Math.sin(angle + Math.PI)).multiply(Base.Constant.Scene.Aim_Line.Length));
+        this._setAttributes(this._aimLine, ["x1", pFrom.x], ["y1", pFrom.y], ["x2", pTo.x], ["y2", pTo.y], ["opacity", Base.Constant.Scene.Aim_Line.Opacity]);
+    }
+    _onTargetHitted(ball) {
+        var target = ball;
+        const result = this._targets.find((t) => target === t[0]);
+        target = result?.[0];
+        const element = result?.[1];
+        if (target && element) {
+            element.style.filter = "saturate(0)";
+        }
+    }
+    _setAttributes(element, ...kvps) {
+        if (!element) {
+            throw new Error("Element is invalid.");
+        }
+        kvps.forEach(kvp => {
+            element.setAttribute(kvp[0], `${kvp[1]}`);
+        });
+    }
+    _getPointsString(...vectors) {
+        const points = vectors.map(vector => `${vector.x},${vector.y}`);
+        return points.join(" ");
+    }
+}

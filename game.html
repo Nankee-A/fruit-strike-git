@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Fruit Strike Game</title>
+
+</head>
+
+<body>
+
+    <svg id="game-scene" xmlns="http://www.w3.org/2000/svg" overflow="invisible">
+
+        <defs>
+
+            <symbol id="default" viewBox="-50 -50 100 100">
+                <!-- 灰色圆形背景 -->
+                <circle cx="0" cy="0" r="45" fill="#CCCCCC" />
+
+                <!-- 红色感叹号 -->
+                <g fill="#FF0000" stroke="none">
+                    <!-- 感叹号上半部分（竖线） -->
+                    <rect x="-5" y="-25" width="10" height="35" rx="5" />
+
+                    <!-- 感叹号底部点 -->
+                    <circle cx="0" cy="20" r="8" />
+                </g>
+            </symbol>
+
+            <symbol id="apple" viewBox="-50 -50 100 100">
+                <circle cx="0" cy="0" r="45" fill="#FF6B6B" />
+                <path d="M-10,-16 L10,-16 L0,-30 Z" fill="#8B4513" />
+                <ellipse cx="0" cy="6" rx="16" ry="20" fill="#FF4757" />
+            </symbol>
+
+            <symbol id="orange" viewBox="-50 -50 100 100">
+                <circle cx="0" cy="0" r="40" fill="#FFA502" />
+                <circle cx="-10" cy="-10" r="6" fill="#FF7F00" opacity="0.6" />
+                <circle cx="12" cy="8" r="4" fill="#FF7F00" opacity="0.6" />
+            </symbol>
+
+            <symbol id="bullet" viewBox="-50 -50 100 100">
+                <circle cx="0" cy="0" r="45" fill="#ddd" />
+            </symbol>
+
+            <symbol id="health" viewBox="-50 -50 100 100">
+                <path d="M0,-20 C-20,-40 -40,-20 -40,0 C-40,20 -20,40 0,50 C20,40 40,20 40,0 C40,-20 20,-40 0,-20 Z"
+                    fill="#FF4757" />
+                <path d="M-15,-10 C-10,-15 0,-15 0,-5 C0,-15 10,-15 15,-10 C20,-5 15,5 0,15 C-15,5 -20,-5 -15,-10 Z"
+                    fill="#FFFFFF" opacity="0.7" />
+            </symbol>
+
+        </defs>
+
+        <rect id="background" width="100%" height="100%" />
+
+        <g id="targets-container"></g>
+        <rect id="mask" width="100%" height="100%" />
+        <g id="bullets-container"></g>
+
+        <line id="aim-line" />
+
+        <g id="bow-string">
+            <polyline fill="none" stroke-linejoin="bevel"/>
+        </g>
+
+        <rect id="bound" />
+
+    </svg>
+
+    <script type="module" src="game/dist/main.js"></script>
+
+</body>
+
+</html>

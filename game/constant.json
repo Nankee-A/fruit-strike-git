@@ -1,0 +1,150 @@
+{
+    "Scene": 
+    {
+        "Background":
+        {
+            "Width":1600,
+            "Height":1000,
+            "Color":"#000"
+        },
+
+        "Mask":
+        {
+            "Y":625,
+            "Color":"#333",
+            "Opacity":1
+        },
+
+        "Bound":
+        {
+            "Min":
+            {
+                "X":-10,
+                "Y":0
+            },
+
+            "Max":
+            {
+                "X":1610,
+                "Y":750
+            },
+
+            "Color":"#0f0",
+            "Opacity":0
+        },
+
+        "Bow_String":
+        {
+            "Y":770,
+            "Length":200,
+            "Width":40,
+            "Color":"#fff"
+        },
+
+        "Aim_Line":
+        {
+            "Length":2000,
+            "Width":10,
+            "Color":"#0f0",
+            "Opacity":0.7
+        }
+    },
+
+    "Game":
+    {
+        "Time_Scale":1,
+        "Spawn_Target_Interval":1,
+
+        "Bow_String":
+        {
+            "Aim_Constraint":true,
+
+            "Stretch":
+            {
+                "Min":50,
+                "Max":210
+            }
+        }
+    },
+
+    "Ball":
+    {
+        "Radius":
+        {
+            "Default":80,
+            "Bullet":10,
+            "Apple":50,
+            "Orange":60
+        },
+
+        "Mass":
+        {
+            "Default":1,
+            "Bullet":1,
+            "Apple":1,
+            "Orange":1
+        },
+
+        "Target":
+        {
+            "Types":["Apple","Orange"],
+
+            "Position":
+            {
+                "X":
+                {
+                    "Base":200,
+                    "Offset":1400
+                },
+
+                "Y":
+                {
+                    "Base":625,
+                    "Offset":0
+                }
+            },
+
+            "Velocity":
+            {
+                "X":
+                {
+                    "Base":-500,
+                    "Offset":1000
+                },
+
+                "Y":
+                {
+                    "Base":-1400,
+                    "Offset":150
+                }
+            },
+
+            "Acceleration":
+            {
+                "X":
+                {
+                    "Base":0,
+                    "Offset":0
+                },
+
+                "Y":
+                {
+                    "Base":2000,
+                    "Offset":0
+                }
+            }
+        },
+
+        "Bullet":
+        {
+            "Speed":
+            {
+                "Base":6000,
+                "Offset":500
+            },
+
+            "Spread_Degree":3,
+            "Spread_Count":3
+        }
+    }
+}
