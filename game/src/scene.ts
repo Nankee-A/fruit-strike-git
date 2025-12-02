@@ -20,6 +20,10 @@ export class Scene extends Base.GameModule
     private _targets: [Target, SVGUseElement][] = [];
     private _bullets: [Bullet, SVGUseElement][] = [];
 
+    private _bowStringAngle: number = 0;
+    private _aimLineActive: boolean = false;
+    private _aimLineAnimations: any[] = [];
+
     private readonly _targetTypes: string[] = Base.Constant.Ball.Target.Types;
     private readonly _boundPoints: BaseType<"Vector2">[] = [
         new Base.Vector2(Base.Constant.Scene.Bound.Min.X, Base.Constant.Scene.Bound.Min.Y),
@@ -288,14 +292,32 @@ export class Scene extends Base.GameModule
 
     public setBowString(drawed: boolean, angle: number = -0.5 * Math.PI, stretch: number = 0)
     {
-        const p0 = Base.Vector2.rotate(this._bowStringPoints[0], this._bowStringPoints[1], (angle - 0.5 * Math.PI) / 2);
-        const p2 = Base.Vector2.rotate(this._bowStringPoints[2], this._bowStringPoints[1], (angle - 0.5 * Math.PI) / 2);
+        var newAngle = angle;
+        var newStretch = stretch;
 
-        const p1 = Base.Vector2.add(this._bowStringPoints[1], new Base.Vector2(Math.cos(angle), Math.sin(angle)).multiply(stretch));
+        if (!drawed)
+        {
+            newAngle = this._bowStringAngle;
+            newStretch = 0;
+        }
+        else
+        {
+            this._bowStringAngle = newAngle;
+        }
 
-        this._setAttributes(this._bowString,
-            ["points", this._getPointsString(p0, p1, p2)]
-        );
+        const p0 = Base.Vector2.rotate(this._bowStringPoints[0], this._bowStringPoints[1], (newAngle - 0.5 * Math.PI) / 2);
+        const p2 = Base.Vector2.rotate(this._bowStringPoints[2], this._bowStringPoints[1], (newAngle - 0.5 * Math.PI) / 2);
+
+        const p1 = Base.Vector2.add(this._bowStringPoints[1], new Base.Vector2(Math.cos(newAngle), Math.sin(newAngle)).multiply(newStretch));
+
+        Base.Animator.to("#bow-string polyline", Base.Constant.Animation.Aim_Duration,
+            {
+                attr:
+                {
+                    points: this._getPointsString(p0, p1, p2)
+                }
+            },
+            false, !drawed);
     }
 
     public setAimLine(active: boolean = false, angle: number = -0.5 * Math.PI, stretch: number = 0)
@@ -305,19 +327,52 @@ export class Scene extends Base.GameModule
             this._setAttributes(this._aimLine,
                 ["opacity", 0]
             );
+
+            while (this._aimLineAnimations.length > 0)
+            {
+                Base.Animator.kill(this._aimLineAnimations.pop());
+            }
+
+            this._aimLineActive = active;
             return;
         }
 
         const pFrom = Base.Vector2.add(this._bowStringPoints[1], new Base.Vector2(Math.cos(angle), Math.sin(angle)).multiply(stretch));
         const pTo = Base.Vector2.add(pFrom, new Base.Vector2(Math.cos(angle + Math.PI), Math.sin(angle + Math.PI)).multiply(Base.Constant.Scene.Aim_Line.Length));
 
-        this._setAttributes(this._aimLine,
-            ["x1", pFrom.x],
-            ["y1", pFrom.y],
-            ["x2", pTo.x],
-            ["y2", pTo.y],
-            ["opacity", Base.Constant.Scene.Aim_Line.Opacity]
-        );
+        if (!this._aimLineActive)
+        {
+            this._setAttributes(this._aimLine,
+                ["x1", pFrom.x],
+                ["y1", pFrom.y],
+                ["x2", pTo.x],
+                ["y2", pTo.y]
+            );
+
+            this._aimLineAnimations.push(Base.Animator.to("#aim-line", Base.Constant.Animation.Aim_Duration,
+                {
+                    attr:
+                    {
+                        opacity: Base.Constant.Scene.Aim_Line.Opacity
+                    }
+                }, false, false
+            ));
+
+            this._aimLineActive = active;
+            return;
+        }
+
+        this._aimLineAnimations.push(Base.Animator.to("#aim-line", Base.Constant.Animation.Aim_Duration,
+            {
+                attr:
+                {
+                    x1: pFrom.x,
+                    y1: pFrom.y,
+                    x2: pTo.x,
+                    y2: pTo.y
+                }
+            }, false, false
+        ));
     }
 
     private _onTargetHitted(ball: BaseType<"Ball">): void

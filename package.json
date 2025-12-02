@@ -1,6 +1,6 @@
 {
-  "scripts": 
-  {
-    "tsc": "tsc"
-  }
+    "scripts": 
+    {
+        "tsc": "tsc"
+    }
 }

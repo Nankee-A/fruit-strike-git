@@ -8,8 +8,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "lib": ["DOM", "ESNext"]
   },
-  "include": ["./game/src/**/*.ts"]
+  //"include": ["./game/src/**/*.ts"]
+  "exclude": ["./game/src/animator.ts"]
 }

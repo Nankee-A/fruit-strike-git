@@ -67,6 +67,11 @@
         }
     },
 
+    "Animation":
+    {
+        "Aim_Duration":0.2
+    },
+
     "Ball":
     {
         "Radius":
@@ -143,8 +148,8 @@
                 "Offset":500
             },
 
-            "Spread_Degree":3,
-            "Spread_Count":3
+            "Spread_Degree":1,
+            "Spread_Count":1
         }
     }
 }

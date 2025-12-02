@@ -1,4 +1,5 @@
 import Constant from "../../constant.json" with { type: "json" };
+import { Animator } from "./animator.js";
 import { Ball } from "./ball.js";
 import { GameModule } from "./gameModule.js";
 import { JSONHelper } from "./jsonHelper.js";
@@ -12,6 +13,9 @@ const BaseClasses = {
 export class Base {
     static get Constant() {
         return Constant;
+    }
+    static get Animator() {
+        return Animator;
     }
     static get Ball() {
         return Ball;
