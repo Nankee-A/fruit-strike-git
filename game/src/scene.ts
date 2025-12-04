@@ -1,4 +1,5 @@
 import { Base, BaseType } from "./base/base.js";
+import { Vector2 } from "./base/vector2.js";
 import { Bullet } from "./bullet.js";
 import { Player } from "./player.js";
 import { Target } from "./target.js";
@@ -8,7 +9,7 @@ export class Scene extends Base.GameModule
     private _gameScene: Element;
     private _background: Element;
     private _mask: Element;
-    private _bound :Element;
+    private _bound: Element;
     private _bowString: Element;
     private _aimLine: Element;
     
@@ -17,8 +18,8 @@ export class Scene extends Base.GameModule
 
     private _timeCounter = 0;
 
-    private _targets: [Target, SVGUseElement][] = [];
-    private _bullets: [Bullet, SVGUseElement][] = [];
+    private _targets: Target[] = [];
+    private _bullets: Bullet[] = [];
 
     private _bowStringAngle: number = 0;
     private _aimLineActive: boolean = false;
@@ -115,122 +116,130 @@ export class Scene extends Base.GameModule
         this._preUpdateTargets(deltaTime);
         this._preUpdateBullets(deltaTime);
 
-        this._checkTargetsCollision(deltaTime);
-
         this._lateUpdateTargets(deltaTime);
         this._lateUpdateBullets(deltaTime);
 
-        //console.info(this._targets.length);
+        //console.info(`targets:${this._targets.length} - bullets:${this._bullets.length}`);
     }
 
     private _preUpdateTargets(deltaTime: number): void
     {
+        for (let i = this._targets.length - 1; i >= 0; i--)
+        {
+            const target = this._targets[i];
+
+            if (this._inScene(target) || (target.Position.y <= 0 - target.Radius))
+            {
+            }
+            else
+            {
+                if (!target.IsHitted
+                    && target.Position.y >= Base.Constant.Scene.Mask.Y + target.Radius
+                    && target.Velocity.y >= 0)
+                {
+                    Player.getInstance().onMiss();
+                }
+
+                this._removeTarget(i);
+                return;
+            }
+
+            if (!target.IsHitted)
+            {
+                target.preUpdate(deltaTime, (bullet) => this._inView(bullet), ...this._bullets);
+            }
+        }
+    }
+
+    private _preUpdateBullets(deltaTime: number): void
+    {
+        for (let i = this._bullets.length - 1; i >= 0; i--)
+        {
+            const bullet = this._bullets[i];
+
+            if (!this._inScene(bullet))
+            {
+                this._removeBullet(i);
+                return;
+            }
+
+            bullet.preUpdate(deltaTime);
+        }
+    }
+
+    private _lateUpdateTargets(deltaTime: number): void
+    {
         this._targets.forEach(target =>
         {
-            target[0].preUpdate(deltaTime);
+            target.lateUpdate(deltaTime, this._targetHandleMoveCallback.bind(this));
+            this._setAttributes(target.Element,
+                ["x", target.Position.x - target.Radius],
+                ["y", target.Position.y - target.Radius]
+            );
+        });
+    }
 
-            if (target[0].movingDistanceToSegment(this._boundPoints[0], this._boundPoints[1]) <= target[0].Radius)
+    private _lateUpdateBullets(deltaTime: number): void
+    {
+        this._bullets.forEach(bullet =>
+        {
+            bullet.lateUpdate(deltaTime, this._bulletHandleMoveCallback.bind(this));
+            this._setAttributes(bullet.Element,
+                ["x", bullet.Position.x - bullet.Radius],
+                ["y", bullet.Position.y - bullet.Radius]
+            );
+        });
+    }
+
+    private _targetHandleMoveCallback(ball: BaseType<"Ball">): BaseType<"Vector2"> | void
+    {
+        if (ball instanceof Target)
+        {
+            const target = ball as Target;
+
+            if (!target.IsHitted && target.Collisions.length > 0)
             {
-                target[0].NextPosition.x = (this._boundPoints[0].x + target[0].Radius) * 2 - target[0].NextPosition.x;
+                target.IsHitted = true;
+                if (target.Element)
+                {
+                    target.Element.style.filter = "saturate(0)";
+                }
             }
-            else if (target[0].movingDistanceToSegment(this._boundPoints[2], this._boundPoints[3]) <= target[0].Radius)
+
+            if (Base.Vector2.segmentDistance(target.Position, target.NextPosition, this._boundPoints[0], this._boundPoints[1]) <= target.Radius)
             {
-                target[0].NextPosition.x = (this._boundPoints[2].x - target[0].Radius) * 2 - target[0].NextPosition.x;
+                target.NextPosition.copyFrom(new Vector2((this._boundPoints[0].x + target.Radius) * 2 - target.NextPosition.x, target.NextPosition.y));
+            }
+            else if(Base.Vector2.segmentDistance(target.Position, target.NextPosition, this._boundPoints[2], this._boundPoints[3]) <= target.Radius)
+            {
+                target.NextPosition.copyFrom(new Vector2((this._boundPoints[2].x - target.Radius) * 2 - target.NextPosition.x, target.NextPosition.y));
             }
             else
             {
                 return;
             }
 
-            target[0].Velocity.flipX();
-            target[0].Acceleration.flipX();
-        });
-    }
-
-    private _preUpdateBullets(deltaTime: number): void
-    {
-        this._bullets.forEach(bullet =>
-        {
-            bullet[0].preUpdate(deltaTime);
-        })
-    }
-
-    private _checkTargetsCollision(deltaTime: number): void
-    {
-        this._targets.forEach(target =>
-        {
-            if (target[0].IsHitted)
-            {
-                return;
-            }
-
-            this._bullets.forEach(bullet =>
-            {
-                target[0].checkCollision(bullet[0]);
-            });
-        });
-    }
-    
-    private _lateUpdateTargets(deltaTime: number): void
-    {
-        for (let i = this._targets.length - 1; i >= 0; i--)
-        {
-            const target = this._targets[i];
-
-            target[0].lateUpdate(deltaTime);
-
-            this._setAttributes(target[1],
-                ["x", target[0].Position.x - target[0].Radius],
-                ["y", target[0].Position.y - target[0].Radius]
-            );
-
-            if (target[0].Position.x <= Base.Constant.Scene.Bound.Min.X + target[0].Radius
-                || target[0].Position.x >= Base.Constant.Scene.Bound.Max.X - target[0].Radius)
-            {
-                this._removeTarget(i);
-                continue;
-            }
-
-            if (target[0].Position.y >= Base.Constant.Scene.Bound.Max.Y - target[0].Radius)
-            {
-                if (!target[0].IsHitted)
-                {
-                    Player.getInstance().onMiss();
-                }
-                this._removeTarget(i);
-                continue;
-            }
+            target.NextVelocity.flipX();
+            target.Acceleration.flipX();
         }
     }
 
-    private _lateUpdateBullets(deltaTime: number): void
+    private _bulletHandleMoveCallback(ball: BaseType<"Ball">): BaseType<"Vector2"> | void
     {
-        for (let i = this._bullets.length - 1; i >= 0; i--)
+        return;
+        
+        if (ball instanceof Bullet)
         {
-            const bullet = this._bullets[i];
-
-            bullet[0].lateUpdate(deltaTime);
-
-            this._setAttributes(bullet[1],
-                ["x", bullet[0].Position.x - bullet[0].Radius],
-                ["y", bullet[0].Position.y - bullet[0].Radius]
-            );
-
-            if (!bullet[0].InScene)
-            {
-                this._removeBullet(i);
-            }
-
-            //console.info(this._bullets.length);
+            const bullet = ball as Bullet;
         }
     }
 
     public spawnTarget(): void
     {
         var targetType = this._targetTypes[Math.floor(Math.random() * this._targetTypes.length)];
-
-        const target = Target.create(targetType, this._onTargetHitted.bind(this));
         const targetElement = document.createElementNS("http://www.w3.org/2000/svg", "use");
+
+        const target = Target.create(targetType, targetElement);
 
         const typeSymbolElement = document.getElementById(targetType.toLowerCase());
         if (!typeSymbolElement)
@@ -248,23 +257,23 @@ export class Scene extends Base.GameModule
         );
 
         this._targetsContainer.appendChild(targetElement);
-        this._targets.push([target, targetElement]);
+        this._targets.push(target);
     }
 
     private _removeTarget(index: number): void
     {
-        const target = this._targets[index][1];
+        const target = this._targets[index];
         this._targets.splice(index, 1);
         if (target)
         {
-            this._targetsContainer.removeChild(target);
+            this._targetsContainer.removeChild(target.Element);
         }
     }
 
     public spawnBullet(position: BaseType<"Vector2">, angle: number): void
     {
-        const bullet = Bullet.create(position, angle);
         const bulletElement = document.createElementNS("http://www.w3.org/2000/svg", "use");
+        const bullet = Bullet.create(position, angle, bulletElement);
 
         bulletElement.setAttributeNS("http://www.w3.org/1999/xlink", "href", "#bullet");
 
@@ -277,16 +286,16 @@ export class Scene extends Base.GameModule
         )
 
         this._bulletsContainer.appendChild(bulletElement);
-        this._bullets.push([bullet, bulletElement]);
+        this._bullets.push(bullet);
     }
 
     private _removeBullet(index: number): void
     {
-        const bullet = this._bullets[index][1];
+        const bullet = this._bullets[index];
         this._bullets.splice(index, 1);
         if (bullet)
         {
-            this._bulletsContainer.removeChild(bullet);
+            this._bulletsContainer.removeChild(bullet.Element);
         }
     }
 
@@ -375,20 +384,6 @@ export class Scene extends Base.GameModule
         ));
     }
 
-    private _onTargetHitted(ball: BaseType<"Ball">): void
-    {
-        var target: Target | undefined = ball as Target;
-        const result = this._targets.find((t) => target === t[0]);
-
-        target = result?.[0];
-        const element = result?.[1];
-
-        if (target && element)
-        {
-            element.style.filter = "saturate(0)";
-        }
-    }
-
     private _setAttributes(element: Element | null | undefined, ...kvps: [string, any][]): void
     {
         if (!element)
@@ -406,5 +401,18 @@ export class Scene extends Base.GameModule
     {
         const points = vectors.map(vector => `${vector.x},${vector.y}`);
         return points.join(" ");
+    }
+
+    private _inScene(ball: BaseType<"Ball">): boolean
+    {
+        return ball.Position.x >= 0 - ball.Radius
+            && ball.Position.x <= Base.Constant.Scene.Background.Width + ball.Radius
+            && ball.Position.y >= 0 - ball.Radius
+            && ball.Position.y <= Base.Constant.Scene.Background.Height + ball.Radius;
+    }
+
+    private _inView(ball: BaseType<"Ball">): boolean
+    {
+        return this._inScene(ball) && ball.Position.y <= Base.Constant.Scene.Mask.Y - ball.Radius;
     }
 }

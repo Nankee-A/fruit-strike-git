@@ -15,40 +15,13 @@ const BaseClasses =
     Vector2,
 }
 
-export class Base
+export const Base =
 {
-    public static get Constant()
-    {
-        return Constant;
-    }
-
-    public static get Animator()
-    {
-        return Animator
-    }
-
-    public static get Ball()
-    {
-        return Ball;
-    }
-
-    public static get GameModule()
-    {
-        return GameModule;
-    }
-
-    public static get JSONHelper()
-    {
-        return JSONHelper;
-    }
-
-    public static get Utility()
-    {
-        return Utility;
-    }
-
-    public static get Vector2()
-    {
-        return Vector2;
-    }
+    Constant,
+    Animator,
+    Ball,
+    GameModule,
+    JSONHelper,
+    Utility,
+    Vector2,
 }

@@ -1,28 +1,28 @@
 import { Vector2 } from "./vector2.js";
 
-type BallInfo =
-{
-    radius: number,
-    mass: number,
-    position: Vector2,
-    velocity: Vector2,
-    acceleration: Vector2
-}
+type Collision =
+    {
+        time: number,
+        ball: Ball
+    }
 
 export abstract class Ball
 {
     protected _radius: number;
     protected _mass: number;
+
     protected _position: Vector2;
     protected _velocity: Vector2;
     protected _acceleration: Vector2;
 
+    protected _element: SVGUseElement;
+    
+    protected _collisions: Collision[];
+
     protected _nextPosition: Vector2;
-    protected _collisions: BallInfo[];
+    protected _nextVelocity: Vector2;
 
-    protected _handleCollisionCallback?: (ball: Ball) => void;
-
-    public constructor(radius: number, mass: number, position: Vector2, velocity: Vector2, acceleration: Vector2, handleCollisionCallback: ((ball: Ball) => void) | undefined)
+    public constructor(radius: number, mass: number, position: Vector2, velocity: Vector2, acceleration: Vector2, element: SVGUseElement)
     {
         if (radius < 0)
         {
@@ -31,14 +31,16 @@ export abstract class Ball
 
         this._radius = radius;
         this._mass = mass;
+
         this._position = position;
         this._velocity = velocity;
         this._acceleration = acceleration;
 
-        this._nextPosition = new Vector2().copyFrom(position);
+        this._element = element;
+        
         this._collisions = [];
-
-        this._handleCollisionCallback = handleCollisionCallback;
+        this._nextPosition = new Vector2().copyFrom(position);
+        this._nextVelocity = new Vector2().copyFrom(velocity);
     }
 
     public get Radius(): number
@@ -66,93 +68,113 @@ export abstract class Ball
         return this._acceleration;
     }
 
+    public get Element(): SVGUseElement
+    {
+        return this._element;
+    }
+
+    public get Collisions(): Collision[]
+    {
+        return this._collisions;
+    }
+
     public get NextPosition(): Vector2
     {
         return this._nextPosition;
     }
 
-    public get Collisions(): BallInfo[]
+    public set NextPosition(value: Vector2)
     {
-        return this._collisions;
+        this._nextPosition.copyFrom(value);
     }
 
-    public get HandleCollisionCallback(): ((ball: Ball) => void) | undefined
+    public get NextVelocity(): Vector2
     {
-        return this._handleCollisionCallback;
+        return this._nextVelocity;
     }
 
-    public set HandleCollisionCallback(value: ((ball: Ball) => void) | undefined)
+    public set NextVelocity(value: Vector2)
     {
-        this._handleCollisionCallback = value;
+        this._nextVelocity.copyFrom(value);
     }
 
-    public preUpdate(deltaTime: number)
+    public preUpdate(deltaTime: number, filter?: (ball: Ball) => boolean, ...others: Ball[]): void
     {
-        const deltaPosition = Vector2.multiply(this._velocity, deltaTime);
-        this._nextPosition.copyFrom(Vector2.add(this._position, deltaPosition));
-    }
-    
-    public checkCollision(other: Ball): void
-    {
-        const distance = this.movingDistanceToSegment(other._position, other._nextPosition);
-        if (distance <= this._radius + other._radius)
+        others.forEach(other =>
         {
-            const ballInfo: BallInfo = {
-                radius: other._radius,
-                mass: other._mass,
-                position: other._position,
-                velocity: other._velocity,
-                acceleration: other._acceleration
-            };
-            this._collisions.push(ballInfo);
-        }
+            if (filter && !filter(other))
+            {
+                return;
+            }
+
+            const collision = this.checkCollision(deltaTime, other);
+            if (collision)
+            {
+                this._collisions.push(collision);
+            }
+        });
     }
 
-    public lateUpdate(deltaTime: number)
+    public lateUpdate(deltaTime: number, handleMoveCallback: (ball: Ball) => void): void
     {
-        this.handleCollisions(deltaTime);
+        this.handleMove(deltaTime, handleMoveCallback);
         this._collisions = [];
 
         this._position.copyFrom(this._nextPosition);
-        this._velocity.add(Vector2.multiply(this._acceleration, deltaTime));
+        this._velocity.copyFrom(this._nextVelocity);
     }
 
-    public abstract handleCollisions(deltaTime: number): void;
-
-    public distanceToSegment(p1: Vector2, p2: Vector2): number
+    protected handleMove(deltaTime: number, handleMoveCallback: (ball: Ball) => void): void
     {
-        return this._position.distanceToSegment(p1, p2) - this._radius;
+        this._nextPosition.add(Vector2.multiply(this._velocity, deltaTime));
+        this._nextVelocity.add(Vector2.multiply(this._acceleration, deltaTime));
+        handleMoveCallback?.(this);
     }
 
-    public movingDistanceToSegment(p1: Vector2, p2: Vector2): number
+    private checkCollision(deltaTime: number, other: Ball): Collision | undefined
     {
-        return this._segmentDistance(this._position, this._nextPosition, p1, p2);
-    }
+        const dp = Vector2.subtract(other._position, this._position);
+        const dv = Vector2.subtract(other._velocity, this._velocity);
+        const r = other._radius + this._radius;
 
-    private _segmentDistance(p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2): number
-    {
-        if (this._doSegmentIntersect(p1, p2, p3, p4))
+        const a = dv.square;
+        const b = 2 * Vector2.dot(dp, dv);
+        const c = dp.square - r ** 2;
+
+        if (Math.abs(a) <= 0)
         {
-            return 0;
+            if (Math.abs(b) <= 0)
+            {
+                return (dp.magnitude <= r) ? { time: 0, ball: other } : undefined;
+            }
+
+            const t0 = -c / b;
+            return (t0 >= 0 && t0 <= deltaTime) ? { time: t0, ball: other } : undefined;
         }
 
-        const distances = [
-            p1.distanceToSegment(p3, p4),
-            p2.distanceToSegment(p3, p4),
-            p3.distanceToSegment(p1, p2),
-            p4.distanceToSegment(p1, p2)
-        ];
+        const d = b ** 2 - (4 * a * c);
 
-        return Math.min(...distances);
-    }
+        if (d < 0)
+        {
+            return undefined;
+        }
 
-    private _doSegmentIntersect(p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2): boolean
-    {
-        const c1: number = Vector2.subtract(p4, p3).cross(Vector2.subtract(p1, p3));
-        const c2: number = Vector2.subtract(p4, p3).cross(Vector2.subtract(p2, p3));
-        const c3: number = Vector2.subtract(p2, p1).cross(Vector2.subtract(p3, p1));
-        const c4: number = Vector2.subtract(p2, p1).cross(Vector2.subtract(p4, p1));
+        const sqrtd = Math.sqrt(Math.max(0, d));
+        const t1 = (-b - sqrtd) / (2 * a);
+        const t2 = (-b + sqrtd) / (2 * a);
 
-        return (c1 * c2 <= 0) && (c3 * c4 <= 0);
+        var t0 = undefined;
+
+        if (t1 >= 0 && t1 <= deltaTime)
+        {
+            t0 = t1;
+        }
+
+        if (!t0 && t2 >= 0 && t2 <= deltaTime)
+        {
+            t0 = t2;
+        }
+
+        return t0 ? { time: t0, ball: other } : undefined;
     }
 }

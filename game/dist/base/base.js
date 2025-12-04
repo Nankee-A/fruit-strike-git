@@ -10,26 +10,12 @@ const BaseClasses = {
     GameModule,
     Vector2,
 };
-export class Base {
-    static get Constant() {
-        return Constant;
-    }
-    static get Animator() {
-        return Animator;
-    }
-    static get Ball() {
-        return Ball;
-    }
-    static get GameModule() {
-        return GameModule;
-    }
-    static get JSONHelper() {
-        return JSONHelper;
-    }
-    static get Utility() {
-        return Utility;
-    }
-    static get Vector2() {
-        return Vector2;
-    }
-}
+export const Base = {
+    Constant,
+    Animator,
+    Ball,
+    GameModule,
+    JSONHelper,
+    Utility,
+    Vector2,
+};

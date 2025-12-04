@@ -57,7 +57,7 @@ export class Player extends Base.GameModule
 
     public onMiss(): void
     {
-        //console.info("shit!");
+        console.info("shit!");
     }
     
     private draw(event: MouseEvent): void

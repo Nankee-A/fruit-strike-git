@@ -35,7 +35,7 @@ export class Player extends Base.GameModule {
     onUpdate(deltaTime) {
     }
     onMiss() {
-        //console.info("shit!");
+        console.info("shit!");
     }
     draw(event) {
         window.addEventListener("mousemove", this._mousemoveEventListener);

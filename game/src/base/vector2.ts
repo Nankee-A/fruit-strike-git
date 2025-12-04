@@ -14,19 +14,9 @@ export class Vector2
         return this._x;
     }
 
-    public set x(value: number)
-    {
-        this._x = value;
-    }
-
     public get y(): number
     {
         return this._y;
-    }
-
-    public set y(value: number)
-    {
-        this._y = value;
     }
 
     public get square(): number
@@ -101,6 +91,16 @@ export class Vector2
         return this;
     }
 
+    public dot(other: Vector2): number
+    {
+        return this._x * other._x + this._y * other._y;
+    }
+
+    public cross(other: Vector2): number
+    {
+        return this._x * other._y - other._x * this._y;
+    }
+
     public copyFrom(other: Vector2): Vector2;
     public copyFrom(x: number, y: number): Vector2;
 
@@ -140,7 +140,7 @@ export class Vector2
         return new Vector2(v._x * scalar, v._y * scalar);
     }
 
-    public static rotate(vector:Vector2,axis: Vector2, angle: number): Vector2
+    public static rotate(vector: Vector2, axis: Vector2, angle: number): Vector2
     {
         const x = vector._x - axis._x;
         const y = vector._y - axis._y;
@@ -154,14 +154,14 @@ export class Vector2
         return new Vector2(axis._x + rotatedX, axis._y + rotatedY);
     }
 
-    public dot(other: Vector2): number
+    public static dot(v1: Vector2, v2: Vector2): number
     {
-        return this._x * other._x + this._y * other._y;
+        return v1._x * v2._x + v1._y * v2._y;
     }
 
-    public cross(other: Vector2): number
+    public static cross(v1: Vector2, v2: Vector2): number
     {
-        return this._x * other._y - other._x * this._y;
+        return v1._x * v2._y - v2._x * v1._y;
     }
 
     public distanceTo(other: Vector2): number
@@ -181,7 +181,7 @@ export class Vector2
             return this.distanceTo(p1);
         }
 
-        const param = v1.dot(v2) / v2.square;
+        const param = Vector2.dot(v1, v2) / v2.square;
         var p3;
 
         if (param < 0)
@@ -198,5 +198,32 @@ export class Vector2
         }
 
         return this.distanceTo(p3);
+    }
+
+    public static segmentDistance(p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2): number
+    {
+        if (this._doSegmentIntersect(p1, p2, p3, p4))
+        {
+            return 0;
+        }
+
+        const distances = [
+            p1.distanceToSegment(p3, p4),
+            p2.distanceToSegment(p3, p4),
+            p3.distanceToSegment(p1, p2),
+            p4.distanceToSegment(p1, p2)
+        ];
+
+        return Math.min(...distances);
+    }
+
+    private static _doSegmentIntersect(p1: Vector2, p2: Vector2, p3: Vector2, p4: Vector2): boolean
+    {
+        const c1: number = Vector2.subtract(p4, p3).cross(Vector2.subtract(p1, p3));
+        const c2: number = Vector2.subtract(p4, p3).cross(Vector2.subtract(p2, p3));
+        const c3: number = Vector2.subtract(p2, p1).cross(Vector2.subtract(p3, p1));
+        const c4: number = Vector2.subtract(p2, p1).cross(Vector2.subtract(p4, p1));
+
+        return (c1 * c2 <= 0) && (c3 * c4 <= 0);
     }
 }

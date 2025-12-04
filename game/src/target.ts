@@ -5,9 +5,9 @@ export class Target extends Base.Ball
     protected _type: string;
     protected _isHitted: boolean = false;
 
-    public constructor(radius: number, mass: number, position: BaseType<"Vector2">, velocity: BaseType<"Vector2">, acceleration: BaseType<"Vector2">, type: string, handleCollisionCallback: ((ball: BaseType<"Ball">) => void) | undefined)
+    public constructor(radius: number, mass: number, position: BaseType<"Vector2">, velocity: BaseType<"Vector2">, acceleration: BaseType<"Vector2">, type: string, element: SVGUseElement)
     {
-        super(radius, mass, position, velocity, acceleration, handleCollisionCallback);
+        super(radius, mass, position, velocity, acceleration, element);
         this._type = type;
     }
 
@@ -21,9 +21,9 @@ export class Target extends Base.Ball
         this._isHitted = value;
     }
 
-    public static create(type: string, handleCollisionCallback: ((ball: BaseType<"Ball">) => void) | undefined = undefined): Target
+    public static create(type: string, element: SVGUseElement): Target
     {
-        const radius =Base.JSONHelper.getByPath(Base.Constant.Ball.Radius, type) ?? Base.Constant.Ball.Radius.Default;
+        const radius = Base.JSONHelper.getByPath(Base.Constant.Ball.Radius, type) ?? Base.Constant.Ball.Radius.Default;
         const mass = Base.JSONHelper.getByPath(Base.Constant.Ball.Mass, type) ?? Base.Constant.Ball.Mass.Default;
         const position = new Base.Vector2(
             Base.JSONHelper.getRandomInRange(Base.Constant.Ball.Target.Position.X),
@@ -35,16 +35,22 @@ export class Target extends Base.Ball
             Base.JSONHelper.getRandomInRange(Base.Constant.Ball.Target.Acceleration.X),
             Base.JSONHelper.getRandomInRange(Base.Constant.Ball.Target.Acceleration.Y));
         
-        return new Target(radius, mass, position, velocity, acceleration, type, handleCollisionCallback);
+        return new Target(radius, mass, position, velocity, acceleration, type, element);
     }
 
-    public handleCollisions(deltaTime: number): void
+    // protected override handleCollisions(deltaTime: number): void
+    // {
+    //     super.handleCollisions(deltaTime);
+
+    //     if (this._collisions.length > 0)
+    //     {
+    //         this._isHitted = true;
+    //         this._acceleration.y *= 1.5;
+    //     }
+    // }
+
+    protected override handleMove(deltaTime: number, handleMoveCallback: (ball: BaseType<"Ball">) => void): void
     {
-        if (this._collisions.length > 0)
-        {
-            this._isHitted = true;
-            this._acceleration.y *= 1.5;
-            this._handleCollisionCallback?.(this);
-        }
+        super.handleMove(deltaTime, handleMoveCallback);
     }
 }
