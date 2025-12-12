@@ -1,0 +1,265 @@
+{
+    "Scene": 
+    {
+        "Background":
+        {
+            "Width":1600,
+            "Height":1000,
+            "Color":"#000"
+        },
+
+        "Mask":
+        {
+            "Y":625,
+            "Color":"#333",
+            "Opacity":1,
+
+            "OnMiss":
+            {
+                "Color":"#f00",
+                "Duration":0.2,
+                "Repeat":1
+            }
+        },
+
+        "Bound":
+        {
+            "Min":
+            {
+                "X":0,
+                "Y":0
+            },
+
+            "Max":
+            {
+                "X":1600,
+                "Y":750
+            },
+
+            "Color":"#0f0",
+            "Opacity":0
+        },
+
+        "UI":
+        {
+            "Total_Score":
+            {
+                "Title":
+                {
+                    "X":40,
+                    "Y":70
+                },
+
+                "Content":
+                {
+                    "X":200,
+                    "Y":0
+                },
+
+                "Color":"#fff",
+                "Font_Size":48
+            },
+
+            "Total_Kill":
+            {
+                "Title":
+                {
+                    "X":40,
+                    "Y":140
+                },
+
+                "Content":
+                {
+                    "X":200,
+                    "Y":0
+                },
+
+                "Color":"#fff",
+                "Font_Size":48
+            },
+
+            "Health":
+            {
+                "X":1590,
+                "Y":5,
+                "Space":-5,
+                "Radius":35
+            },
+
+            "Score":
+            {
+                "Color":"#fff",
+                "Font_Size":48,
+                "Duration":1,
+
+                "Offset":
+                {
+                    "X":0,
+                    "Y":-150
+                }
+            },
+
+            "Over":
+            {
+                "Color":"#fff",
+                "Font_Size":64
+            }
+        },
+
+        "Bow_String":
+        {
+            "Y":770,
+            "Length":200,
+            "Width":40,
+            "Color":"#fff",
+            "Aim_Duration":0.2
+        },
+
+        "Aim_Line":
+        {
+            "Length":2000,
+            "Width":10,
+            "Color":"#0f0",
+            "Opacity":0.7
+        },
+
+        "Effect":
+        {
+            "Hit":
+            {
+                "Color":"#0f0",
+                "Duration":1,
+                "Radius":100
+            },
+
+            "Upgrade":
+            {
+                "Color":"#fff",
+                "Duration":1,
+                "Radius":600
+            }
+        }
+    },
+
+    "Game":
+    {
+        "Time_Scale":1,
+        "Health":6,
+
+        "Bow_String":
+        {
+            "Aim_Constraint":true,
+
+            "Stretch":
+            {
+                "Min":70,
+                "Max":210
+            }
+        },
+
+        "Target":
+        {
+            "Spawn_Interval":1.2,
+            "Spawn_Continuous_Interval":0.1,
+            "Continuous_Probability":0.33
+        }
+    },
+
+    "Ball":
+    {
+        "Elasticity":0.8,
+
+        "Radius":
+        {
+            "Default":80,
+            "Bullet":10,
+            "Apple":55,
+            "Orange":60,
+            "BlueBerry":50
+        },
+
+        "Mass":
+        {
+            "Default":10,
+            "Bullet":2,
+            "Apple":10,
+            "Orange":10,
+            "BlueBerry":7
+        },
+
+        "Target":
+        {
+            "Types":["Apple","Orange","BlueBerry"],
+
+            "Score":
+            {
+                "Default":10,
+                "Apple":10,
+                "Orange":10,
+                "BlueBerry":15
+            },
+
+            "Position":
+            {
+                "X":
+                {
+                    "Base":200,
+                    "Offset":1400
+                },
+
+                "Y":
+                {
+                    "Base":625,
+                    "Offset":0
+                }
+            },
+
+            "Velocity":
+            {
+                "X":
+                {
+                    "Base":300,
+                    "Offset":200
+                },
+
+                "Y":
+                {
+                    "Base":-1400,
+                    "Offset":150
+                }
+            },
+
+            "Acceleration":
+            {
+                "X":
+                {
+                    "Base":0,
+                    "Offset":0
+                },
+
+                "Y":
+                {
+                    "Base":2000,
+                    "Offset":0
+                }
+            },
+
+            "OnHitted":
+            {
+                "Drop":1.5,
+                "Discolor":"saturate(0)"
+            }
+        },
+
+        "Bullet":
+        {
+            "Speed":
+            {
+                "Base":8000
+            },
+
+            "Spread_Degree":3,
+            "Spread_Count":1
+        }
+    }
+}

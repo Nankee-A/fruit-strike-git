@@ -2,13 +2,11 @@
   "compilerOptions": {
     "target": "esnext",
     "module": "esnext",
-    "outDir": "./game/dist",
-    "rootDir": "./game/src",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "esModuleInterop": true,
   },
-  //"include": ["./game/src/**/*.ts"]
-  "exclude": ["./game/src/animator.ts"]
 }

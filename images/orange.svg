@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="26.458334mm"
+   height="26.458334mm"
+   viewBox="0 0 26.458334 26.458334"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <linearGradient
+       id="swatch3">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop3" />
+    </linearGradient>
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath3">
+      <circle
+         style="display:none;fill:#dca73c;fill-opacity:1;stroke-width:0.264583"
+         id="circle3"
+         cx="50"
+         cy="50"
+         r="10.583333"
+         d="M 60.583333,50 A 10.583333,10.583333 0 0 1 50,60.583333 10.583333,10.583333 0 0 1 39.416667,50 10.583333,10.583333 0 0 1 50,39.416667 10.583333,10.583333 0 0 1 60.583333,50 Z" />
+      <path
+         id="lpe_path-effect3"
+         style="fill:#dca73c;fill-opacity:1;stroke-width:0.264583"
+         class="powerclip"
+         d="M 31.770833,31.770833 H 68.229167 V 68.229167 H 31.770833 Z M 60.583333,50 A 10.583333,10.583333 0 0 0 50,39.416667 10.583333,10.583333 0 0 0 39.416667,50 10.583333,10.583333 0 0 0 50,60.583333 10.583333,10.583333 0 0 0 60.583333,50 Z" />
+    </clipPath>
+  </defs>
+  <circle
+     style="fill:#ffd700;fill-opacity:1;stroke:none;stroke-width:0.396875;stroke-linecap:round;stroke-miterlimit:0;stroke-dasharray:1.5875, 1.19062;stroke-dashoffset:2.69875;stroke-opacity:1;paint-order:markers fill stroke"
+     id="path3"
+     cx="13.229167"
+     cy="13.229167"
+     r="13.229167" />
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.661458;stroke-linecap:round;stroke-miterlimit:0;stroke-dasharray:2.64583, 1.98437;stroke-dashoffset:4.49792;stroke-opacity:1;paint-order:markers fill stroke"
+     d="M 2.645832,13.229166 H 23.812499"
+     id="path2" />
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.661458;stroke-linecap:round;stroke-miterlimit:0;stroke-dasharray:2.64583, 1.98437;stroke-dashoffset:4.49792;stroke-opacity:1;paint-order:markers fill stroke"
+     d="M 13.229167,2.6326265 V 23.799294"
+     id="path2-5" />
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.661458;stroke-linecap:round;stroke-miterlimit:0;stroke-dasharray:2.64583, 1.98437;stroke-dashoffset:4.49792;stroke-opacity:1;paint-order:markers fill stroke"
+     d="M 5.7362811,20.722052 20.703375,5.7549585"
+     id="path2-1" />
+  <path
+     style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.661458;stroke-linecap:round;stroke-miterlimit:0;stroke-dasharray:2.64583, 1.98437;stroke-dashoffset:4.49792;stroke-opacity:1;paint-order:markers fill stroke"
+     d="M 5.7362812,5.7362814 20.703375,20.703375"
+     id="path2-6" />
+  <g
+     id="layer1"
+     transform="translate(-36.770834,-36.770834)">
+    <path
+       style="fill:#ff8c00;fill-opacity:1;stroke-width:0.264583"
+       id="path1"
+       clip-path="url(#clipPath3)"
+       d="M 63.229167,50 A 13.229167,13.229167 0 0 1 50,63.229167 13.229167,13.229167 0 0 1 36.770833,50 13.229167,13.229167 0 0 1 50,36.770833 13.229167,13.229167 0 0 1 63.229167,50 Z" />
+  </g>
+  <circle
+     style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.396875;stroke-linecap:round;stroke-miterlimit:0;stroke-dasharray:1.5875, 1.19062;stroke-dashoffset:2.69875;stroke-opacity:1;paint-order:markers fill stroke"
+     id="path3-3"
+     cx="13.229167"
+     cy="13.229167"
+     r="1.8520833" />
+</svg>
