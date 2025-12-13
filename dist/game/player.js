@@ -27,7 +27,8 @@ export class Player extends GameModule {
         this._cursor = this._svg.createSVGPoint();
         this._startPosition = new Vector2();
         this._currentPosition = new Vector2();
-        this._playerData = PlayerDataManager.load("akee") ?? PlayerDataManager.register("akee", "0125");
+        this._playerData = PlayerDataManager.loadCurrent()
+            ?? (() => { throw new Error("Failed to load current player data."); })();
     }
     get IsAiming() {
         return this._isAiming;
@@ -37,8 +38,7 @@ export class Player extends GameModule {
     }
     async onInit() {
         window.addEventListener("mousedown", this._mousedownEventListener);
-        console.info(this._playerData.bestGrade.score);
-        console.info(this._playerData.rank);
+        console.info(this._playerData);
     }
     onUpdate(deltaTime) {
     }
@@ -47,16 +47,16 @@ export class Player extends GameModule {
         var added = rate >= 1 ? JSONHelper.getByPath(Constant.Ball.Target.Score, target.Type) * rate : 0;
         this._score += added;
         this._kill += 1;
-        if (this._kill > 0 && this._kill % 10 == 0) {
-            Scene.getInstance().makeUpgradeEffect(Constant.Scene.Effect.Upgrade.Color);
-        }
+        // if (this._kill > 0 && this._kill % 10 == 0)
+        // {
+        //     Scene.getInstance().makeUpgradeEffect(Constant.Scene.Effect.Upgrade.Color);
+        // }
         Scene.getInstance().setUI(this._score, this._kill);
         Scene.getInstance().setScore(added, collision.point);
         Scene.getInstance().makeHitEffect(collision.point);
     }
     onHurt() {
         if (--this._health <= 0) {
-            Scene.getInstance().onGameOver();
             if (this._isAiming) {
                 this.loose();
             }
@@ -71,6 +71,7 @@ export class Player extends GameModule {
                 };
             }
             PlayerDataManager.save(this._playerData);
+            Scene.getInstance().onGameOver();
         }
         return this._health;
     }

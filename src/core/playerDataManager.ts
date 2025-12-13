@@ -14,11 +14,17 @@ export type PlayerData =
 export class PlayerDataManager 
 {
     private static readonly PREFIX = "player_";
+    public static _currentId: string;
 
     public static load(id: string): PlayerData | undefined 
     {
         const data = localStorage.getItem(this.PREFIX + id);
         return data ? (JSON.parse(data) as PlayerData) : undefined;
+    }
+
+    public static loadCurrent(): PlayerData | undefined
+    {
+        return this.load(this._currentId);
     }
 
     public static loadAll(): PlayerData[]

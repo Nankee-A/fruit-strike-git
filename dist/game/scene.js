@@ -328,6 +328,9 @@ export class Scene extends GameModule {
     onGameOver() {
         this._over = true;
         this._setAttributes(this._overElement, ["opacity", 1]);
+        window.addEventListener("mousedown", (event) => {
+            location.reload();
+        });
     }
     makeHitEffect(position) {
         const effectElement = document.createElementNS('http://www.w3.org/2000/svg', 'circle');

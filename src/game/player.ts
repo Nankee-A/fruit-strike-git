@@ -43,7 +43,8 @@ export class Player extends GameModule
         this._startPosition = new Vector2();
         this._currentPosition = new Vector2();
 
-        this._playerData = PlayerDataManager.load("akee") ?? PlayerDataManager.register("akee", "0125");
+        this._playerData = PlayerDataManager.loadCurrent()
+            ?? (() => { throw new Error("Failed to load current player data.") })();
     }
 
     public get IsAiming(): boolean
@@ -59,8 +60,7 @@ export class Player extends GameModule
     public override async onInit(): Promise<void>
     {
         window.addEventListener("mousedown", this._mousedownEventListener);
-        console.info(this._playerData.bestGrade.score);
-        console.info(this._playerData.rank);
+        console.info(this._playerData);
     }
 
     public onUpdate(deltaTime: number): void
@@ -74,10 +74,10 @@ export class Player extends GameModule
     
         this._score += added;
         this._kill += 1;
-        if (this._kill > 0 && this._kill % 10 == 0)
-        {
-            Scene.getInstance().makeUpgradeEffect(Constant.Scene.Effect.Upgrade.Color);
-        }
+        // if (this._kill > 0 && this._kill % 10 == 0)
+        // {
+        //     Scene.getInstance().makeUpgradeEffect(Constant.Scene.Effect.Upgrade.Color);
+        // }
 
         Scene.getInstance().setUI(this._score, this._kill);
         Scene.getInstance().setScore(added, collision.point);
@@ -89,11 +89,11 @@ export class Player extends GameModule
     {
         if (--this._health <= 0)
         {
-            Scene.getInstance().onGameOver();
             if (this._isAiming)
             {
                 this.loose();
             }
+
             window.removeEventListener("mousedown", this._mousedownEventListener);
             window.removeEventListener("mousemove", this._mousemoveEventListener);
             window.removeEventListener("mouseup", this._mouseupEventListener);
@@ -107,6 +107,7 @@ export class Player extends GameModule
                 };
             }
             PlayerDataManager.save(this._playerData);
+            Scene.getInstance().onGameOver();
         }
 
         return this._health;

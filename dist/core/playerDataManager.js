@@ -1,8 +1,12 @@
 export class PlayerDataManager {
     static PREFIX = "player_";
+    static _currentId;
     static load(id) {
         const data = localStorage.getItem(this.PREFIX + id);
         return data ? JSON.parse(data) : undefined;
+    }
+    static loadCurrent() {
+        return this.load(this._currentId);
     }
     static loadAll() {
         return Object.keys(localStorage)

@@ -577,6 +577,11 @@ export class Scene extends GameModule
         this._setAttributes(this._overElement,
             ["opacity", 1]
         );
+
+        window.addEventListener("mousedown", (event: MouseEvent) =>
+        {
+            location.reload();
+        });
     }
 
     public makeHitEffect(position: Vector2): void

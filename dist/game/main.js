@@ -1,6 +1,8 @@
+import { PlayerDataManager } from "../core/playerDataManager.js";
 import { Constant } from "./base/index.js";
 import { Player } from "./player.js";
 import { Scene } from "./scene.js";
+PlayerDataManager._currentId = "nankee";
 const gameModules = [
     Player.getInstance(),
     Scene.getInstance()
